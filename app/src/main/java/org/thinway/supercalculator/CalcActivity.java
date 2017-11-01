@@ -34,6 +34,9 @@ public class CalcActivity extends AppCompatActivity implements View.OnClickListe
     // Data
     private double mAccumulator;
     private char mOp;
+    private boolean firstOp;
+    private boolean secondEquals;
+    private double secondNumber;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +56,8 @@ public class CalcActivity extends AppCompatActivity implements View.OnClickListe
         mAccumulator = 0;
         mOp = 0;
         resultTextView.setText("0");
+        firstOp = true;
+        secondEquals = false;
     }
 
     /**
@@ -157,7 +162,9 @@ public class CalcActivity extends AppCompatActivity implements View.OnClickListe
      * Apply the selected operation
      */
     private void makeOperation() {
-        double secondNumber = Double.parseDouble(resultTextView.getText().toString());
+        if (!secondEquals) {
+           secondNumber = Double.parseDouble(resultTextView.getText().toString());
+        }
         double total = 0;
 
         switch (mOp) {
@@ -175,6 +182,8 @@ public class CalcActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             default:
         }
+        secondEquals = true;
+        mAccumulator = total;
 
         long totalInt = (long) total;
 
@@ -189,24 +198,20 @@ public class CalcActivity extends AppCompatActivity implements View.OnClickListe
         mOp = button.getText().toString().charAt(0);
         mAccumulator = Double.parseDouble(resultTextView.getText().toString());
 
-        resultTextView.setText("0");
+        //resultTextView.setText("0");
+        firstOp = true;
     }
 
     private void deleteNumber() {
         String actualNumber = resultTextView.getText().toString();
 
-        if (actualNumber.length() == 1 || actualNumber.length() == 2 && Integer.parseInt(actualNumber) < 0) {
+        if (actualNumber.length() == 1 && Integer.parseInt(actualNumber) < 0) {
             resultTextView.setText("0");
         } else {
-            if (actualNumber.charAt(actualNumber.length() - 2) != '.') {
                 resultTextView.setText(
                         actualNumber.substring(0, actualNumber.length() - 1)
                 );
-            } else {
-                resultTextView.setText(
-                        actualNumber.substring(0, actualNumber.length() - 2)
-                );
-            }
+
 
         }
     }
@@ -236,27 +241,26 @@ public class CalcActivity extends AppCompatActivity implements View.OnClickListe
     private void readNumber(Button button) {
         String digit = button.getText().toString();
         String actualNumber = resultTextView.getText().toString();
-        boolean intNumber = (actualNumber.indexOf('.') == -1) ? true : false;
 
         Log.d("CalcActivity", "mAccumulator = " + mAccumulator + " | mOp = " + mOp);
 
 
-        if (intNumber) {
-            if (actualNumber.equals("0")) {
-                resultTextView.setText(digit);
-            } else {
-                resultTextView.setText(
-                        resultTextView.getText().toString() + digit
-                );
-            }
-
-            if (resultTextView.getText().toString().equals("0") && mOp == '/') {
-                equalBtn.setEnabled(false);
-            } else {
-                equalBtn.setEnabled(true);
-            }
+        if (firstOp || actualNumber == "0") {
+            resultTextView.setText("");
+            resultTextView.setText(digit);
+            firstOp = false;
+        } else {
+            resultTextView.setText(
+                    resultTextView.getText().toString() + digit
+            );
         }
 
-
+        if (resultTextView.getText().toString().equals("0") && mOp == '/') {
+            equalBtn.setEnabled(false);
+        } else {
+            equalBtn.setEnabled(true);
+        }
     }
+
 }
+
